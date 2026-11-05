@@ -1,0 +1,58 @@
+Admin membuat pemilihan dengan jadwal buka dan tutup; status Belum Dibuka, Dibuka, atau Ditutup dihitung otomatis dari jam, sehingga bilik tidak bisa dipakai di luar jadwal. Pasangan calon (nomor urut, ketua, wakil, kelas, visi, misi, foto) dikunci begitu bilik dibuka. Daftar pemilih tetap bisa diimpor dari CSV (nis;nama;kelas) dan setiap pemilih otomatis mendapat token 6 karakter tanpa huruf yang mirip (O/0, I/1/L), lalu kartu token dicetak per kelas.
+
+Di bilik suara, pemilih masuk dengan NIS dan token (dibatasi 5 percobaan per 10 menit), memilih pasangan calon, dan mengonfirmasi. Dalam satu transaksi database, sistem menandai pemilih sudah memilih dengan UPDATE bersyarat (sudah_memilih = 0) yang hanya bisa berhasil satu kali, lalu memasukkan satu suara ke tabel suara yang tidak memiliki kolom pemilih, memakai ID acak (bukan auto increment), dan hanya mencatat jam yang dibulatkan, sehingga suara tidak bisa ditelusuri balik ke pemilih lewat urutan maupun waktu. Monitor panitia menampilkan partisipasi per kelas, arus pemilih per jam, dan cek integritas (jumlah suara harus sama dengan jumlah pemilih yang sudah memilih). Rekap perolehan suara hanya bisa dilihat admin selama pemilihan berlangsung, dan terbuka untuk panitia (serta publik bila diaktifkan) setelah ditutup, lengkap dengan berita acara siap cetak.
+Fitur
+Bilik suara digital mode kios: login NIS + token, pilih, konfirmasi, otomatis kembali ke awal
+Suara rahasia: tabel suara tanpa identitas pemilih, ID acak, waktu dibulatkan ke jam
+Anti suara ganda: satu token hanya berlaku sekali, aman walau dikirim dari dua perangkat bersamaan
+Batas percobaan login token (anti tebak token)
+Jadwal buka dan tutup otomatis, plus tombol tutup pemilihan darurat
+Pasangan calon dengan nomor urut, foto, visi, dan misi
+Data kandidat terkunci otomatis setelah bilik dibuka
+Daftar pemilih tetap per kelas, impor dari CSV/Excel
+Token 6 karakter otomatis tanpa karakter yang membingungkan (O/0, I/1/L)
+Cetak kartu token per kelas siap gunting
+Ganti token pemilih yang belum memilih (bila kartu hilang)
+Monitor partisipasi per kelas secara langsung, kelas di bawah 60% ditandai
+Grafik arus pemilih per jam
+Cek integritas otomatis: jumlah suara = jumlah pemilih yang sudah memilih
+Rekap perolehan suara hanya untuk admin selama pemilihan berlangsung
+Hasil akhir dan berita acara siap cetak setelah pemilihan ditutup
+Opsi tampilkan hasil ke publik di halaman bilik
+Riwayat pemilihan (bisa dipakai untuk pemilihan tahun berikutnya)
+2 peran: Admin (pembina) dan Panitia
+Data contoh 448 pemilih di 16 kelas dan 3 pasangan calon, tampilan Swiss style yang responsif
+Panduan instalasi
+Kebutuhan: PHP 8.0+ (ekstensi fileinfo aktif) dan MySQL/MariaDB (XAMPP atau Laragon).
+
+Ekstrak ZIP, lalu pindahkan folder e-voting ke:
+
+XAMPP: C:\xampp\htdocs\e-voting
+Laragon: C:\laragon\www\e-voting
+Jalankan Apache dan MySQL.
+
+Buka http://localhost/phpmyadmin → Import → pilih database/e_voting.sql → Import.
+
+Atau lewat terminal:
+
+mysql -u root -p < database/e_voting.sql
+Pemilihan contoh otomatis dibuka hari ini jam 07.00 sampai besok jam 14.00.
+
+Sesuaikan config/database.php jika user/password MySQL kamu berbeda:
+
+return [
+    'host'     => 'localhost',
+    'port'     => 3306,
+    'database' => 'e_voting',
+    'username' => 'root',
+    'password' => '',
+];
+Bilik suara: http://localhost/e-voting (halaman awal). Coba pakai NIS dan token dari menu Daftar Pemilih.
+
+Panel panitia: http://localhost/e-voting/index.php?page=login
+
+Admin / pembina: admin / admin123
+Panitia: panitia / admin123
+Untuk pemilihan sungguhan: buka Pengaturan → buat pemilihan baru dan atur jadwal → isi Kandidat → impor Daftar Pemilih dari CSV → cetak kartu token.
+
+Tips: pakai beberapa laptop sebagai bilik suara, cukup buka alamat aplikasi di browser masing-masing (satu jaringan WiFi/LAN dengan komputer server).
